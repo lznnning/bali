@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bali 2026 Exclusive Trip</title>
+    <style>
+        :root {
+            /* 莫蘭迪冷色系 - 最終定案版 */
+            --bg-color: #F7F9FC;
+            --text-primary: #2D3748;
+            --text-secondary: #718096;
+            --text-light: #A0AEC0;
+            --accent-blue: #7F9CAD; /* 更優雅的灰藍 */
+            --accent-green: #95A5A6; /* 冷調綠 */
+            --accent-pink: #D9A5A5; /* 配合地圖標記的莫蘭迪粉 */
+            --glass-bg: rgba(255, 255, 255, 0.9);
+            --glass-border: rgba(255, 255, 255, 0.6);
+            --shadow: 0 8px 24px rgba(149, 157, 165, 0.1);
+            --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            padding-bottom: 120px; /* 留給底部按鈕 */
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+            padding: 24px;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            padding: 30px 0 20px 0;
+        }
+
+        .logo-area {
+            width: 72px;
+            height: 72px;
+            background: linear-gradient(135deg, #E0E7FF 0%, #F5F3FF 100%);
+            border-radius: 24px;
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            box-shadow: var(--shadow);
+            transform: rotate(-5deg);
+        }
+
+        h1 {
+            font-weight: 300;
+            font-size: 1.8rem;
+            letter-spacing: 3px;
+            color: var(--text-primary);
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            font-size: 0.8rem;
+            color: var(--accent-blue);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        /* Tabs */
+        .nav-scroller {
+            overflow-x: auto;
+            white-space: nowrap;
+            padding: 10px 0 25px 0;
+            scrollbar-width: none;
+        }
+        .nav-scroller::-webkit-scrollbar { display: none; }
+
+        .date-tabs { display: inline-flex; gap: 12px; }
+
+        .tab-btn {
+            background: #fff;
+            border: 1px solid #E2E8F0;
+            border-radius: 18px;
+            padding: 10px 18px;
+            min-width: 72px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--text-light);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .tab-btn.active {
+            background: var(--text-primary);
+            color: #fff;
+            border-color: var(--text-primary);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(45, 55, 72, 0.25);
+        }
+
+        .tab-btn.active .tab-day { color: rgba(255,255,255,0.7); }
+        .tab-date { font-size: 1.1rem; font-weight: 600; line-height: 1.2; }
+        .tab-day { font-size: 0.65rem; text-transform: uppercase; font-weight: 500; letter-spacing: 0.5px; margin-top: 2px; }
+
+        /* Card Content */
+        .day-content { display: none; animation: slideUp 0.4s ease-out; }
+        .day-content.active { display: block; }
+        
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            background: var(--glass-bg);
+            border-radius: 32px;
+            padding: 6px; /* Inner padding for image border */
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
+        }
+
+        /* Image Area */
+        .card-image-wrapper {
+            position: relative;
+            border-radius: 28px;
+            overflow: hidden;
+            height: 200px;
+            background: #EDF2F7;
+        }
+        
+        .card-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.6s ease;
+        }
+        
+        /* Weather Tag on Image */
+        .weather-badge {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(4px);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        /* Transport Tag on Image */
+        .transport-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(45, 55, 72, 0.85);
+            backdrop-filter: blur(4px);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: #fff;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .card-body {
+            padding: 24px 20px 20px;
+        }
+
+        .day-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 25px;
+            padding-left: 10px;
+            border-left: 4px solid var(--accent-pink);
+        }
+
+        /* Timeline Styles */
+        .timeline {
+            list-style: none;
+            position: relative;
+            padding-left: 10px;
+        }
+        
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 19px;
+            top: 10px;
+            bottom: 0;
+            width: 1px;
+            background: #E2E8F0;
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-left: 45px;
+            margin-bottom: 35px;
+        }
+        .timeline-item:last-child { margin-bottom: 0; }
+
+        .dot {
+            position: absolute;
+            left: 12px;
+            top: 6px;
+            width: 15px;
+            height: 15px;
+            background: #fff;
+            border: 3px solid var(--accent-blue);
+            border-radius: 50%;
+            z-index: 2;
+            box-shadow: 0 0 0 3px rgba(255,255,255,0.8);
+        }
+
+        .time-label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--accent-blue);
+            margin-bottom: 4px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .item-title {
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+        }
+
+        .item-desc {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* Travel Time Indicator */
+        .travel-time {
+            font-size: 0.75rem;
+            color: var(--text-light);
+            background: #F7FAFC;
+            padding: 4px 10px;
+            border-radius: 6px;
+            margin-top: 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .travel-time::before { content: '🚗'; font-size: 0.8rem; opacity: 0.7; }
+
+        /* Flight Card */
+        .flight-card {
+            background: linear-gradient(to right, #F8FAFC, #fff);
+            border: 1px solid #EDF2F7;
+            border-left: 3px solid var(--accent-pink);
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-top: 8px;
+        }
+        .flight-code { font-weight: 700; color: var(--accent-pink); font-size: 0.85rem; }
+        .flight-route { font-size: 0.8rem; color: var(--text-secondary); margin-top: 2px; }
+
+        /* Bottom Floating Buttons */
+        .fab-container {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            z-index: 100;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .fab-btn {
+            flex: 1;
+            border: none;
+            background: var(--text-primary);
+            color: #fff;
+            padding: 16px 0;
+            border-radius: 50px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 10px 25px rgba(45, 55, 72, 0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            backdrop-filter: blur(10px);
+        }
+
+        .fab-btn.light {
+            background: rgba(255, 255, 255, 0.95);
+            color: var(--text-primary);
+        }
+
+        .fab-btn:active { transform: scale(0.96); }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(45, 55, 72, 0.6);
+            backdrop-filter: blur(6px);
+            z-index: 999;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .modal-overlay.open { display: flex; opacity: 1; align-items: flex-end; }
+
+        .modal-sheet {
+            background: #fff;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            border-radius: 30px 30px 0 0;
+            padding: 30px 25px 40px;
+            max-height: 85vh;
+            overflow-y: auto;
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .modal-overlay.open .modal-sheet { transform: translateY(0); }
+
+        .sheet-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 25px;
+            position: sticky; top: 0; background: #fff; z-index: 10;
+        }
+        .sheet-title { font-size: 1.2rem; font-weight: 700; color: var(--text-primary); }
+        .sheet-close {
+            width: 36px; height: 36px;
+            border-radius: 50%; background: #F7FAFC; border: none;
+            font-size: 1.2rem; color: #718096; cursor: pointer;
+        }
+
+        /* Map Image Styles */
+        .map-wrapper {
+            width: 100%;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+            border: 1px solid #EDF2F7;
+        }
+        .map-img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* Route Styles */
+        .route-segment {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #F7FAFC;
+        }
+        .route-day-badge {
+            background: var(--text-primary);
+            color: #fff;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 4px 8px;
+            border-radius: 6px;
+            margin-right: 15px;
+            margin-top: 4px;
+        }
+        .route-flow {
+            flex: 1;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+        .place-pill {
+            font-size: 0.85rem;
+            color: var(--text-primary);
+            background: #EDF2F7;
+            padding: 6px 12px;
+            border-radius: 12px;
+            border: 1px solid #E2E8F0;
+        }
+        .flow-arrow { color: #CBD5E0; font-size: 0.8rem; }
+
+        /* Checklist Styles */
+        .check-group h4 {
+            font-size: 0.8rem; color: var(--accent-blue);
+            text-transform: uppercase; margin: 25px 0 10px;
+            letter-spacing: 1px;
+        }
+        .check-row {
+            display: flex; align-items: center;
+            padding: 12px 0; border-bottom: 1px solid #F7FAFC;
+        }
+        .check-row input {
+            width: 20px; height: 20px;
+            accent-color: var(--accent-pink);
+            margin-right: 15px;
+        }
+        .check-row span { font-size: 0.95rem; color: var(--text-primary); }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div class="logo-area">🌿</div>
+        <h1>BALI 2026</h1>
+        <div class="subtitle">Feb 6 - Feb 10 • 5 Friends Trip</div>
+    </header>
+
+    <div class="nav-scroller">
+        <div class="date-tabs">
+            <div class="tab-btn active" onclick="openTab('day1', this)">
+                <span class="tab-date">06</span>
+                <span class="tab-day">Fri</span>
+            </div>
+            <div class="tab-btn" onclick="openTab('day2', this)">
+                <span class="tab-date">07</span>
+                <span class="tab-day">Sat</span>
+            </div>
+            <div class="tab-btn" onclick="openTab('day3', this)">
+                <span class="tab-date">08</span>
+                <span class="tab-day">Sun</span>
+            </div>
+            <div class="tab-btn" onclick="openTab('day4', this)">
+                <span class="tab-date">09</span>
+                <span class="tab-day">Mon</span>
+            </div>
+            <div class="tab-btn" onclick="openTab('day5', this)">
+                <span class="tab-date">10</span>
+                <span class="tab-day">Tue</span>
+            </div>
+        </div>
+    </div>
+
+    <main>
+        <div id="day1" class="day-content active">
+            <div class="card">
+                <div class="card-image-wrapper">
+                    <img src="https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=800&q=80" class="card-img" alt="Pandawa Beach">
+                    <div class="weather-badge">🌤 29°C 晴時多雲</div>
+                    <div class="transport-badge">🚐 接機專車</div>
+                </div>
+                <div class="card-body">
+                    <h3 class="day-title">Day 1 • 初見秘境沙灘</h3>
+                    <ul class="timeline">
+                        <li class="timeline-item">
+                            <div class="dot"></div>
+                            <div class="time-label">09:10 - 14:40</div>
+                            <div class="item-title">出發：TPE ✈️ DPS</div>
+                            <div class="flight-card">
+                                <div class="flight-code">CI 771 China Airlines</div>
+                                <div class="flight-route">台北桃園 T1 ➔ 峇里島伍拉·賴</div>
+                            </div>
+                        </li>
+                        <li class="timeline-item">
+                            <div class="dot"></div>
+                            <div class="time-label">15:30</div>
+                            <div class="item-title">潘達瓦海灘 (Pandawa Beach)</div>
+                            <div class="item-desc">從機場直奔南部的「秘密海灘」，巨大的石灰岩壁鑿出的道路，景色壯闊，初見印度洋的藍。</div>
+                            <div class="travel-time">機場 ➔ 海灘：車程約 45 分</div>
+                        </li>
+                        <li class="timeline-item">
+                            <div class="dot"></div>
+                            <div class="time-label">18:00</div>
+                            <div class="item-title">Megibung 傳統風味晚餐</div>
+                            <div class="item-desc">體驗傳統的峇里島共享式料理，感受在地氛圍。</div>
+                            <div class="travel-time">海灘 ➔ 餐廳：車程約 30 分</div>
+                        </li>
+                        <li class="timeline-item">
+                            <div class="dot"></div>
+                            <div class="time-label">20:00</div>
+                            <div class="item-title">入住庫塔/水明漾飯店</div>
+                            <div class="item-desc">Check-in 休息，養精蓄銳。</div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div id="day2" class="day-content">
+            <div class="card">
+                <div class="card-image-wrapper">
+                    <img src="https://images.unsplash.com/photo-1518548419970-58e3b4079ab2?auto=format&fit=crop&w=800&q=80" class="card-img" alt="Ubud">
+                    <div class="weather-badge">🌦 27°C 舒適微雨</div>
+                    <div class="transport-badge">🚐 全日包車 (10hr)</div>
+                </div>
+                <div class="card-body">
+                    <h3 class="day-title">Day 2 • 烏布人文與梯田</h3>
+                    <ul class="timeline">
+                        <li class="timeline-item">
+                            <div class="dot"></div>
+                            <div class="time-label">09:30</div>
+                            <div class="item-title">烏布皇宮 & 藝術市集</div>
+                            <div class="item-desc">參觀精緻的皇室建築，於市集挑選藤編包與手工藝品。</div>
+                            <div class="travel-time">庫塔 ➔ 烏布：車程約 1.5 小時</div>
+                        </li>
+                        <li class="timeline-item">
+                            <div class="dot"></div>
+                            <div class="time-label">12:00</div>
+                            <div class="item-title">午餐：髒鴨風味餐</div>
+                            <div class="item-desc">烏布必吃的 Crispy Duck，外皮酥脆肉質軟嫩，搭配田園景觀。</div>
+                        </li>
+                        <li class="timeline-item">
+                            <div class="dot"></div>
+                            <div class="time-label">14:00</div>
+                            <div class="item-title">Alas Harum 梯田俱樂部</div>
+                            <div class="item-desc">結合德哥拉朗梯田美景、網美鞦韆與鳥巢拍照點，是IG打卡聖地。</div>
+                            <div class="travel-time">市區 ➔ 梯田：車程約 25 分</div>
+                        </li>
+                        <li class="timeline-item">
+                            <div class="dot"></div>
+                            <div class="time-label">18:00</div>
+                            <div class="item-title">返回市區晚餐</div>
+                            <div class="item-desc">享用精緻印尼料理或異國美食。</div>
+                            <div class="travel-time">梯田 ➔ 南部：車程約 1.5 小時</div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div id="day3" class="day-content">
+            <div class="card">
+                <div class="card-image-wrapper">
+                    <img src="https://images.unsplash.com/photo-1555400038-63f5ba517a47?auto=format&fit=crop&w=800&q=80" class="card-img" alt="Tanah Lot">
+                    <div class="weather-badge">☁️ 28°C 陰涼舒適</div>
+                    <div class="transport-badge">🚗 VW敞篷 + 包車</div>
+                </div>
+                <div class="card-body">
+                    <h3 class="day-title">Day 3 • 復古兜風與SPA</h3>
+                    <ul class="timeline">
+                        <li class="timeline-item">
+                            <div class="dot"></div>
+                            <div class="time-label">09:00</div>
+                            <div class="item-title">VW 復古敞篷車巡遊</div>
+                            <div class="item-desc">搭乘經典彩色 Volkswagen 敞篷車穿梭鄉間小路，享受微風吹拂，絕對吸睛！</div>
+                        </li>
+                        <li class="timeline-item">
+                            <div class="dot"></div>
+                            <div class="time-label">11:30</div>
+                            <div class="item-title">海神廟 (Tanah Lot)</div>
+                            <div class="item-desc">矗立在海中岩石上的神廟，漲潮時成為孤島，景色奇特。</div>
+                            <div class="travel-time">敞篷車遊程結束後轉往</div>
+                        </li>
+                        <li class="timeline-item">
+                            <div class="dot"></div>
+                            <div class="time-label">15:00</div>
+                            <div class="item-title">熱石 SPA 按摩 (2小時)</div>
+                            <div class="item-desc">使用加熱火山石進行深層按摩，徹底釋放肌肉壓力，消除旅途疲勞。</div>
+                            <div class="travel-time">海神廟 ➔ 水明漾/庫塔：車程約 1 小時</div>
+                        </li>
+                        <li class="timeline-item">
+                            <div class="dot"></div>
+                            <div class="time-label">18:00</div>
+                            <div class="item-title">金巴蘭海鮮 BBQ</div>
+                            <div class="item-desc">著名的沙灘夕陽晚餐，伴隨海浪聲享用炭烤海鮮。</div>
+                            <div class="travel-time">市區 ➔ 金巴蘭：車程約 30 分</div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div id="day4" class="day-content">
+            <div class="card">
+                <div class="card-image-wrapper">
+                    <img src="https://images.unsplash.com/photo-1596707328574-e35df389025e?auto=format&fit=crop&w=800&q=80" class="card-img" alt="Uluwatu">
+                    <div class="weather-badge">☀️ 30°C 晴朗炎熱</div>
+                    <div class="transport-badge">🚐 全日包車 (10hr)</div>
+                </div>
+                <div class="card-body">
+                    <h3 class="day-title">Day 4 • 藍色公路與斷崖</h3>
+                    <ul class="timeline">
+                        <li class="timeline-item">
+                            <div class="dot"></div>
+                            <div class="time-label">10:00</div>
+                            <div class="item-title">神鷹廣場 (GWK)</div>
+                            <div class="item-desc">參觀震撼人心的巨型神鷹雕像，是峇里島的新地標。</div>
+                            <div class="travel-time">市區 ➔ GWK：車程約 40 分</div>
+                        </li>
+                        <li class="timeline-item">
+                            <div class="dot"></div>
+                            <div class="time-label">13:00</div>
+                            <div class="item-title">Tanah Barak 藍色公路</div>
+                            <div class="item-desc">近期爆紅打卡點，道路切開石灰岩壁，盡頭是蔚藍大海，極具視覺衝擊。</div>
+                            <div class="travel-time">GWK ➔ 藍色公路：車程約 20 分</div>
+                        </li>
+                        <li class="timeline-item">
+                            <div class="dot"></div>
+                            <div class="time-label">16:30</div>
+                            <div class="item-title">烏魯瓦圖斷崖廟</div>
+                            <div class="item-desc">站在70米高的懸崖上俯瞰印度洋，氣勢磅礡，小心調皮的猴子。</div>
+                            <div class="travel-time">藍色公路 ➔ 烏魯瓦圖：車程約 15 分</div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div id="day5" class="day-content">
+            <div class="card">
+                <div class="card-image-wrapper">
+                    <img src="https://images.unsplash.com/photo-1600334129128-685c5582fd35?auto=format&fit=crop&w=800&q=80" class="card-img" alt="Massage Spa">
+                    <div class="weather-badge">✈️ 28°C 準備返程</div>
+                    <div class="transport-badge">🚕 送機專車</div>
+                </div>
+                <div class="card-body">
+                    <h3 class="day-title">Day 5 • 極致放鬆與返家</h3>
+                    <ul class="timeline">
+                        <li class="timeline-item">
+                            <div class="dot"></div>
+                            <div class="time-label">10:00</div>
+                            <div class="item-title">離別前的放鬆：精油按摩</div>
+                            <div class="item-desc">安排在機場附近的頂級 SPA (如 Reborn 或 Taman Air)，用 2 小時的療程完美結束旅程。</div>
+                            <div class="travel-time">飯店 ➔ SPA：車程約 15 分</div>
+                        </li>
+                        <li class="timeline-item">
+                            <div class="dot"></div>
+                            <div class="time-label">12:30</div>
+                            <div class="item-title">午餐：Babi Guling 烤乳豬</div>
+                            <div class="item-desc">品嚐峇里島最著名的在地料理 (如 Pak Malen)，皮脆肉香。</div>
+                            <div class="travel-time">SPA ➔ 餐廳：車程約 10 分</div>
+                        </li>
+                        <li class="timeline-item">
+                            <div class="dot"></div>
+                            <div class="time-label">13:40</div>
+                            <div class="item-title">前往機場報到</div>
+                            <div class="item-desc">準備搭機，整理退稅與最後免稅店購物。</div>
+                            <div class="travel-time">餐廳 ➔ 機場：車程約 20 分</div>
+                        </li>
+                        <li class="timeline-item">
+                            <div class="dot"></div>
+                            <div class="time-label">15:40 - 21:05</div>
+                            <div class="item-title">DPS ✈️ TPE</div>
+                            <div class="flight-card">
+                                <div class="flight-code">CI 772 China Airlines</div>
+                                <div class="flight-route">伍拉·賴 ➔ 台北桃園 T1</div>
+                            </div>
+                        </li>
+                        <li class="timeline-item">
+                            <div class="dot"></div>
+                            <div class="time-label">22:30</div>
+                            <div class="item-title">抵達甜蜜的家</div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div class="fab-container">
+        <button class="fab-btn light" onclick="toggleModal('mapModal')">
+            🗺️ 旅遊地圖
+        </button>
+        <button class="fab-btn" onclick="toggleModal('checkModal')">
+            🎒 必備清單
+        </button>
+    </div>
+</div>
+
+<div id="mapModal" class="modal-overlay">
+    <div class="modal-sheet">
+        <div class="sheet-header">
+            <div class="sheet-title">Trip Route Map</div>
+            <button class="sheet-close" onclick="toggleModal('mapModal')">&times;</button>
+        </div>
+        
+        <div class="map-wrapper">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/Bali_Lombok_map.png/800px-Bali_Lombok_map.png" class="map-img" alt="Bali Map">
+        </div>
+
+        <div class="route-segment">
+            <div class="route-day-badge">D1</div>
+            <div class="route-flow">
+                <span class="place-pill">✈️ 機場</span>
+                <span class="flow-arrow">➜</span>
+                <span class="place-pill">🌊 潘達瓦海灘</span>
+                <span class="flow-arrow">➜</span>
+                <span class="place-pill">🏨 庫塔區</span>
+            </div>
+        </div>
+        <div class="route-segment">
+            <div class="route-day-badge">D2</div>
+            <div class="route-flow">
+                <span class="place-pill">🏯 烏布皇宮</span>
+                <span class="flow-arrow">➜</span>
+                <span class="place-pill">🦆 髒鴨餐</span>
+                <span class="flow-arrow">➜</span>
+                <span class="place-pill">🌾 德哥拉朗</span>
+            </div>
+        </div>
+        <div class="route-segment">
+            <div class="route-day-badge">D3</div>
+            <div class="route-flow">
+                <span class="place-pill">🚙 敞篷車</span>
+                <span class="flow-arrow">➜</span>
+                <span class="place-pill">🛕 海神廟</span>
+                <span class="flow-arrow">➜</span>
+                <span class="place-pill">💆‍♀️ 熱石SPA</span>
+            </div>
+        </div>
+        <div class="route-segment">
+            <div class="route-day-badge">D4</div>
+            <div class="route-flow">
+                <span class="place-pill">🗿 神鷹廣場</span>
+                <span class="flow-arrow">➜</span>
+                <span class="place-pill">🛣️ 藍色公路</span>
+                <span class="flow-arrow">➜</span>
+                <span class="place-pill">⛰️ 烏魯瓦圖</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="checkModal" class="modal-overlay">
+    <div class="modal-sheet">
+        <div class="sheet-header">
+            <div class="sheet-title">Travel Checklist</div>
+            <button class="sheet-close" onclick="toggleModal('checkModal')">&times;</button>
+        </div>
+        
+        <div class="check-group">
+            <h4>📄 證件 & 金錢</h4>
+            <div class="check-row"><input type="checkbox"><span>護照 (效期6個月以上)</span></div>
+            <div class="check-row"><input type="checkbox"><span>電子簽證 e-VOA (截圖/列印)</span></div>
+            <div class="check-row"><input type="checkbox"><span>旅遊稅繳費證明 (QR Code)</span></div>
+            <div class="check-row"><input type="checkbox"><span>機票行程單 & 飯店憑證</span></div>
+            <div class="check-row"><input type="checkbox"><span>美金 (建議帶百元大鈔) & 信用卡</span></div>
+        </div>
+
+        <div class="check-group">
+            <h4>💊 藥品 (非常重要)</h4>
+            <div class="check-row"><input type="checkbox"><span>腸胃藥 & 止瀉藥 (建議必備)</span></div>
+            <div class="check-row"><input type="checkbox"><span>暈車藥 (山路/坐船/敞篷車)</span></div>
+            <div class="check-row"><input type="checkbox"><span>防蚊液 (含DEET成分)</span></div>
+            <div class="check-row"><input type="checkbox"><span>止痛藥 & 綜合感冒藥</span></div>
+            <div class="check-row"><input type="checkbox"><span>OK繃 & 蘆薈凝膠 (曬後修復)</span></div>
+        </div>
+
+        <div class="check-group">
+            <h4>🔌 電子 & 雜項</h4>
+            <div class="check-row"><input type="checkbox"><span>兩孔圓形轉接頭</span></div>
+            <div class="check-row"><input type="checkbox"><span>行動電源 (需隨身攜帶)</span></div>
+            <div class="check-row"><input type="checkbox"><span>網卡 (eSIM 或實體卡)</span></div>
+            <div class="check-row"><input type="checkbox"><span>泳衣/泳褲 (2套) & 墨鏡</span></div>
+            <div class="check-row"><input type="checkbox"><span>薄外套 (飛機/冷氣房用)</span></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openTab(dayId, btn) {
+        // 隱藏所有內容
+        document.querySelectorAll('.day-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+        
+        // 顯示選中內容
+        document.getElementById(dayId).classList.add('active');
+        btn.classList.add('active');
+    }
+
+    function toggleModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if(modal.classList.contains('open')) {
+            modal.classList.remove('open');
+        } else {
+            // 關閉其他 Modal
+            document.querySelectorAll('.modal-overlay').forEach(el => el.classList.remove('open'));
+            modal.classList.add('open');
+        }
+
+        // 點擊背景關閉
+        modal.onclick = function(e) {
+            if(e.target === modal) modal.classList.remove('open');
+        }
+    }
+</script>
+
+</body>
+</html>
